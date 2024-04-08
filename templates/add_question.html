@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Question</title>
+</head>
+<body>
+    <h1>Add Question</h1>
+    <form action="/admin/add_question" method="POST">
+        <input type="hidden" name="category_id" value="{{ category_id }}">
+        <input type="hidden" name="level_number" value="easy"> <!-- Set the level number here -->
+        <label for="question_text">Question Text:</label><br>
+        <textarea name="question_text" id="question_text" required></textarea><br>
+        <label for="correct_answer">Correct Answer:</label><br>
+        <input type="text" name="correct_answer" id="correct_answer" required><br>
+        <label for="option1">Option 1:</label><br>
+        <input type="text" name="option" id="option1" required><br>
+        <label for="option2">Option 2:</label><br>
+        <input type="text" name="option" id="option2" required><br>
+        <label for="option3">Option 3:</label><br>
+        <input type="text" name="option" id="option3" required><br>
+        <label for="option4">Option 4:</label><br>
+        <input type="text" name="option" id="option4" required><br>
+        <label for="level">Level:</label><br>
+        <select name="level" id="level">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select><br>
+        <button type="submit">Add Question</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Categories</title>
+    <style>
+        /* Define your CSS styles here */
+    </style>
+</head>
+<body>
+    <!-- Navigation bar -->
+    <div class="navbar">
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+        <!-- Logout link or button -->
+        <li><a href="/user/logout">Logout</a></li>
+    </div>
+
+    <!-- Content for the quiz categories -->
+    <h1>Quiz Categories</h1>
+    <ul>
+        {% for category in categories %}
+            <li><a href="{{ url_for('user.quiz_options', category_id=category.id) }}">{{ category.name }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Result</title>
+</head>
+<body>
+    <h1>Quiz Result</h1>
+    <table border="1">
+        <tr>
+            <th>Question</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+        </tr>
+        {% for submission in user_submissions %}
+        <tr>
+            <td>{{ submission.question_text }}</td>
+            <td>{{ submission.user_answer }}</td>
+            <td>{{ submission.correct_answer }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

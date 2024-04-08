@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Level</title>
+</head>
+<body>
+    <h1>Choose Level</h1>
+    <ul>
+        {% for level in levels %}
+        <li><a href="{{ url_for('user.start_quiz', category_id=category_id, level_number=level.level_number) }}">Level {{ level.level_number }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

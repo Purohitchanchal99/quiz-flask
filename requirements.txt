@@ -1,0 +1,7 @@
+Flask==2.0.2
+Flask-WTF==0.15.1
+SQLAlchemy==1.4.31
+Flask-Bcrypt==0.7.1
+PyJWT==2.3.0
+Flask==1.1.4
+psycopg2
