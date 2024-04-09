@@ -194,14 +194,13 @@ def get_categories():
     categories_data = [{'id': category.id, 'name': category.name} for category in categories]
     return jsonify(categories_data), 200
 
-
-
 @admin_blueprint.route('/add_question_category_level', methods=['POST'])
 def add_question_category_level():
     data = request.get_json()
 
     # Validate incoming data
-    if not all(key in data for key in ('category_id', 'level_number', 'question_text', 'options', 'correct_answer')):
+    required_fields = ('category_id', 'level_number', 'question_text', 'options', 'correct_answer')
+    if not all(key in data for key in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
 
     category_id = data['category_id']
@@ -210,37 +209,31 @@ def add_question_category_level():
     options = data['options']
     correct_answer = data['correct_answer']
 
-    # Check if category_id and level_number exist
+    # Retrieve or create the Category and Level objects
     category = Category.query.get(category_id)
     if not category:
-        return jsonify({'error': 'Category not found'}), 404
+        return jsonify({'error': f'Category with ID {category_id} not found'}), 404
 
     level = Level.query.filter_by(category_id=category_id, level_number=level_number).first()
     if not level:
-        return jsonify({'error': 'Level not found for this category'}), 404
-
-    # Check if options and correct_answer are valid
-    if not (1 <= correct_answer <= 4):
-        return jsonify({'error': 'Invalid correct answer'}), 400
-
-    if len(options) != 4:
-        return jsonify({'error': 'There must be exactly 4 options'}), 400
-
-    # Save the question and options
-    try:
-        question = Question(level_id=level.id, question_text=question_text, correct_answer=correct_answer)
-        db.session.add(question)
+        level = Level(category_id=category_id, level_number=level_number)
+        db.session.add(level)
         db.session.commit()
 
-        for idx, option_text in enumerate(options, start=1):
-            option = Option(question_id=question.id, option_text=option_text)
-            db.session.add(option)
+    # Create the Question object
+    question = Question(level_id=level.id, question_text=question_text, correct_answer=correct_answer)
+    db.session.add(question)
+    db.session.commit()  # Commit to generate the question's ID
 
-        db.session.commit()
-        return jsonify({'message': 'Question added successfully'}), 201
-    except IntegrityError:
-        db.session.rollback()
-        return jsonify({'error': 'Error adding question'}), 500
+    # Create the Option objects
+    for option_text in options:
+        option = Option(question_id=question.id, option_text=option_text)  # Assign question_id here
+        db.session.add(option)
+
+    db.session.commit()
+
+    return jsonify({'message': 'Question added successfully'}), 201
+
     
 @admin_blueprint.route('/update_question/<int:question_id>', methods=['PUT'])
 def update_question(question_id):
@@ -252,21 +245,3 @@ def update_question(question_id):
             return jsonify({'error': 'Missing required fields'}), 400
         
 
-@admin_blueprint.route('/delete_question/<int:question_id>', methods=['DELETE'])
-def delete_question(question_id):
-    if request.method == 'DELETE':
-        # Retrieve the question from the database
-        question = Question.query.get(question_id)
-        if not question:
-            return jsonify({'error': 'Question not found'}), 404
-
-        # Delete the question and its associated options
-        try:
-            Option.query.filter_by(question_id=question_id).delete()
-            db.session.delete(question)
-            db.session.commit()
-            return jsonify({'message': 'Question deleted successfully'}), 200
-        except IntegrityError:
-            db.session.rollback()
-            return jsonify({'error': 'Error deleting question'}), 500
-    return jsonify({'error': 'Invalid request method'}), 405

@@ -7,7 +7,9 @@
     <title>Select Category</title>
 </head>
 <body>
-    <h1>Select Category</h1>
+    <h1>Selct Category</h1>
+    <p> in this  cataogories wil  be displayed according to alphabet</p>
+    
     <ul>
         {% for category in categories %}
         <li><a href="{{ url_for('user.start_quiz', category_id=category.id) }}">{{ category.name }}</a></li>

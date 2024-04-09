@@ -20,9 +20,12 @@
 
     <!-- Content for the quiz categories -->
     <h1>Quiz Categories</h1>
+    <p> in this  cataogories wil  be displayed according to alphabet</p>
     <ul>
-        {% for category in categories %}
-            <li><a href="{{ url_for('user.quiz_options', category_id=category.id) }}">{{ category.name }}</a></li>
+        {% for category in categories|sort(attribute='name') %}
+
+
+           # <li><a href="{{ url_for('user.quiz_options', category_id=category.id) }}">{{ category.name }}</a></li>
         {% endfor %}
     </ul>
 </body>

@@ -1,10 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz</title>
-</head>
 <body>
     <h1>Quiz Questions</h1>
     
@@ -15,24 +8,19 @@
         <p>Question: {{ question.question_text }}</p>
         
         <!-- Display the options for the current question -->
-        <form action="{{ url_for('user.submit_answers') }}" method="POST">
-            <ul>
-                <!-- Iterate over question options -->
-                {% for option in question.options %}
-                <li>
-                    <input type="radio" name="answer" value="{{ option.id }}"
-                           {% if question.selected_option == option.id %} checked {% endif %}>
-                    {{ option.option_text }}
-                </li>
-                {% endfor %}
-            </ul>
-            
-            <input type="submit" value="Submit Answer">
-            <!-- Submit button to submit the answer -->
-        </form>
+        
+        <!-- Display the options for the current question -->
+<ul>
+    <!-- Iterate over question options -->
+    {% for option in question.options %}
+    <li><input type="radio" name="answer_{{ question.id }}" value="{{ option.id }}">{{ option.option_text }}</li>
+    <!-- Radio buttons for options -->
+    {% endfor %}
+</ul>
+
     </div>
     {% endfor %}
-    
+
     <!-- Pagination links -->
     <div>
         <!-- Link to navigate to the previous page -->
@@ -47,6 +35,14 @@
         {% if current_page < total_pages %}
         <a href="{{ url_for('user.display_questions', category_id=category_id, level_number=level_number, page=current_page+1) }}">Next</a>
         {% endif %}
+        
+        <!-- Display the submit button only on the last page -->
+        {% if current_page == total_pages %}
+        <form action="{{ url_for('user.submit_answers') }}" method="POST">
+            <input type="hidden" name="category_id" value="{{ category_id }}">
+            <input type="hidden" name="level_number" value="{{ level_number }}">
+            <input type="submit" value="Submit Answers">
+        </form>
+        {% endif %}
     </div>
 </body>
-</html>

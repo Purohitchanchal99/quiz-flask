@@ -1,14 +1,15 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
-from models import db, Category, Level, User ,Question ,Option
+from models import db, Category, Level, User ,Question ,Option# Import required models
 from flask_bcrypt import Bcrypt
-from sqlalchemy import func
+from sqlalchemy import func, asc
+
 import jwt
 import datetime
 
-user_blueprint = Blueprint('user', __name__)  
-bcrypt = Bcrypt() 
+user_blueprint = Blueprint('user', __name__)  # Define Blueprint
+bcrypt = Bcrypt()  # Initialize Bcrypt for password hashing
 
-
+# Function to generate JWT token
 def generate_token(user_id):
     token = jwt.encode({'user_id': user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, 'your_secret_key')
     return token
@@ -31,11 +32,12 @@ def login():
         # Render a template with success message
         return render_template('login_success.html', token=token)
 
+    # Handle GET request (e.g., render login form)
     return render_template('login.html')
 
+# Route to display available categories for quiz
 
-
-
+# Route to register a new user
 @user_blueprint.route('/userregister', methods=['POST'])
 def register():
     data = request.form  # Use request.form to access form-encoded data
@@ -59,19 +61,19 @@ def register():
     db.session.add(new_user)
     db.session.commit()
      
-
+    # Return a success message
     return render_template('login.html', message='User created successfully'), 201
 
-
+# Route to logout
 @user_blueprint.route('/logout', methods=['GET'])
 def logout():
     return redirect(url_for('user.login'))  
 
-
+# Route to choose a category for quiz
 
 @user_blueprint.route('/choose_category', methods=['GET'])
 def choose_category():
-    categories = Category.query.all()
+    categories = Category.query.order_by(asc(Category.name)).all()
     return render_template('select_category.html', categories=categories)
 
 def get_levels_for_category(category_id):
@@ -81,7 +83,7 @@ def get_levels_for_category(category_id):
 
 @user_blueprint.route('/start_quiz/<int:category_id>', methods=['GET'])
 def start_quiz(category_id):
-    
+    # Get levels for the selected category
     levels = get_levels_for_category(category_id)
     return render_template('choose_level.html', levels=levels, category_id=category_id)
 def get_questions_for_category_and_level(category_id, level_number):
@@ -94,66 +96,84 @@ def get_questions_for_category_and_level(category_id, level_number):
     return questions
 import random
 
-
+from random import shuffle
 @user_blueprint.route('/display_questions', methods=['GET'])
 def display_questions():
     category_id = request.args.get('category_id')
     level_number = request.args.get('level_number')
-    page = request.args.get('page', default=1, type=int)  
-    questions_per_page = 2  
+    page = request.args.get('page', default=1, type=int)  # Get the page number from the request query parameters
+    questions_per_page = 2  # Define the number of questions per page
 
+    # Retrieve questions for the selected category and level
     questions = get_questions_for_category_and_level(category_id, level_number, page, questions_per_page)
 
+    # If no questions found, return an error message
     if not questions.items:
         return "No questions found for the provided category and level."
-    
-    # Populate options for each question
-    for question in questions.items:
-        question.options = Option.query.filter_by(question_id=question.id).all()
+# Retrieve options for each question
+    for question in questions:
+        question.options = get_options_for_question(question.id)
 
+    # Pass the current page number and total pages to the template context
     current_page = page
     total_pages = questions.pages
+
+    # Render the template to display questions
     return render_template('display_questions.html', 
                            questions=questions.items, 
                            current_page=current_page, 
                            total_pages=total_pages,
-                           category_id=category_id,  
-                           level_number=level_number)  
+                           category_id=category_id,  # Pass category_id to the template
+                           level_number=level_number)  # Pass level_number to the template
 
 
 def get_questions_for_category_and_level(category_id, level_number, page=1, per_page=5):
+    # Retrieve questions for the specified category_id and level_number
     questions = Question.query \
         .join(Level, Question.level_id == Level.id) \
         .filter(Level.category_id == category_id, Level.level_number == level_number) \
         .paginate(page=page, per_page=per_page, error_out=False)
+    
+    # Shuffle the order of questions
+    questions.items = list(questions.items)
+    shuffle(questions.items)
+    
     return questions
+
+def get_options_for_question(question_id, page=1, per_page=5):
+    # Retrieve options for the specified question_id
+    options = Option.query.filter_by(question_id=question_id).paginate(page=page, per_page=per_page)
+    
+    # Shuffle the order of options
+    options.items = list(options.items)
+    shuffle(options.items)
+    
+    return options
+
+
+
 
 @user_blueprint.route('/submit_answers', methods=['POST'])
 def submit_answers():
-    submitted_answers = request.form.getlist('answer')
-    questions = Question.query.all()
-    user_submissions = []
-    correct_answers = []
+    category_id = request.form.get('category_id')
+    level_number = request.form.get('level_number')
 
-    # Loop through submitted answers and retrieve corresponding questions and options
-    for i, submitted_answer in enumerate(submitted_answers):
-        question = questions[i]
+    # Retrieve all questions for the given category and level
+    questions = Question.query \
+        .join(Level, Question.level_id == Level.id) \
+        .filter(Level.category_id == category_id, Level.level_number == level_number) \
+        .all()
+
+    user_submissions = []
+
+    # Iterate over each question to gather user submissions and correct answers
+    for question in questions:
+        user_answer = request.form.get('answer_{}'.format(question.id))
         correct_answer = question.correct_answer
-        options = Option.query.filter_by(question_id=question.id).all()
-        correct_option_text = None
-        
-        # Find the correct option text
-        for option in options:
-            if option.option_text == correct_answer:
-                correct_option_text = option.option_text
-                break
-        
         user_submissions.append({
             'question_text': question.question_text,
-            'user_answer': submitted_answer,
-            'correct_answer': correct_option_text
+            'user_answer': user_answer,
+            'correct_answer': correct_answer
         })
-        correct_answers.append(correct_option_text)
 
-    # Redirect to the quiz result page with user submissions and correct answers
-    return render_template('quiz_result.html', user_submissions=user_submissions, correct_answers=correct_answers)
+    return render_template('quiz_result.html', user_submissions=user_submissions)
