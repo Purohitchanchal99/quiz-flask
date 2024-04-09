@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app, render_template, redirect, url_for, session,abort
-from models import db, Admin, User, Category,Level,Question
+
 from models import db, Admin, User, Category, Level, Question, Option
 from sqlalchemy.exc import IntegrityError 
 
@@ -244,4 +244,21 @@ def update_question(question_id):
         if not all(key in data for key in ('question_text', 'options', 'correct_answer')):
             return jsonify({'error': 'Missing required fields'}), 400
         
-
+@admin_blueprint.route('/questions', methods=['GET'])
+def get_question_ids_with_texts():
+    try:
+        # Query the database to retrieve question IDs and texts
+        questions = Question.query.all()
+        question_data = [{'id': question.id, 'text': question.question_text} for question in questions]
+        
+        # Return question IDs and texts as a JSON response
+        return jsonify({'questions': question_data}), 200
+    except Exception as e:
+        # Handle any errors that occur during the process
+        return jsonify({'error': str(e)}), 500
+@admin_blueprint.route('/admin_code', methods=['GET'])
+def get_admin_code():
+    try:
+        return jsonify({'admin_code': admin_registration_code}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

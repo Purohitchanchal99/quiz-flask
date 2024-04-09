@@ -8,16 +8,16 @@
         <p>Question: {{ question.question_text }}</p>
         
         <!-- Display the options for the current question -->
-        
-        <!-- Display the options for the current question -->
-<ul>
-    <!-- Iterate over question options -->
-    {% for option in question.options %}
-    <li><input type="radio" name="answer_{{ question.id }}" value="{{ option.id }}">{{ option.option_text }}</li>
-    <!-- Radio buttons for options -->
-    {% endfor %}
-</ul>
-
+        <ul>
+            <!-- Iterate over question options -->
+            {% for option in question.options %}
+            <li>
+                <input type="radio" name="answer_{{ question.id }}" value="{{ option.id }}">
+                {{ option.option_text }}
+            </li>
+            <!-- Radio buttons for options -->
+            {% endfor %}
+        </ul>
     </div>
     {% endfor %}
 

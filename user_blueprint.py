@@ -11,7 +11,7 @@ bcrypt = Bcrypt()  # Initialize Bcrypt for password hashing
 
 # Function to generate JWT token
 def generate_token(user_id):
-    token = jwt.encode({'user_id': user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, 'your_secret_key')
+    token = jwt.encode({'user_id': user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=220)}, 'your_secret_key')
     return token
 
 # Login route
@@ -71,10 +71,6 @@ def logout():
 
 # Route to choose a category for quiz
 
-@user_blueprint.route('/choose_category', methods=['GET'])
-def choose_category():
-    categories = Category.query.order_by(asc(Category.name)).all()
-    return render_template('select_category.html', categories=categories)
 
 def get_levels_for_category(category_id):
     # Retrieve levels for the specified category_id
@@ -149,7 +145,6 @@ def get_options_for_question(question_id, page=1, per_page=5):
     shuffle(options.items)
     
     return options
-
 
 
 

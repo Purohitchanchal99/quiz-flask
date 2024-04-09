@@ -8,6 +8,7 @@
 </head>
 <body>
     <h1>Choose Level</h1>
+    <p>  each question wil have 4 option you have to click on 1 u thik  will be right option</P>
     <ul>
         {% for level in levels %}
         <li><a href="{{ url_for('user.display_questions', category_id=category_id, level_number=level.level_number) }}">Level {{ level.level_number }}</a></li>
