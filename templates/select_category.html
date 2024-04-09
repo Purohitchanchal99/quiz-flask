@@ -7,13 +7,15 @@
     <title>Select Category</title>
 </head>
 <body>
-    <h1>Selct Category</h1>
-    <p> in this  cataogories wil  be displayed according to alphabet</p>
-     <!-- Search bar -->
-     <form action="{{ url_for('user.search_categories') }}" method="GET">
+    <h1>Select Category</h1>
+    <p>Categories will be displayed alphabetically.</p>
+    
+    <!-- Search bar -->
+    <form action="{{ url_for('user.search_categories') }}" method="GET">
         <input type="text" name="query" placeholder="Search categories by name">
         <button type="submit">Search</button>
     </form>
+    
     <ul>
         {% for category in categories %}
         <li><a href="{{ url_for('user.start_quiz', category_id=category.id) }}">{{ category.name }}</a></li>

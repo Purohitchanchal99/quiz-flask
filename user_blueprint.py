@@ -11,7 +11,7 @@ bcrypt = Bcrypt()  # Initialize Bcrypt for password hashing
 
 # Function to generate JWT token
 def generate_token(user_id):
-    token = jwt.encode({'user_id': user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=220)}, 'your_secret_key')
+    token = jwt.encode({'user_id': user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, 'your_secret_key')
     return token
 
 # Login route
@@ -70,6 +70,33 @@ def logout():
     return redirect(url_for('user.login'))  
 
 # Route to choose a category for quiz
+
+@user_blueprint.route('/choose_category', methods=['GET'])
+def choose_category():
+    categories = Category.query.order_by(asc(Category.name)).all()
+    return render_template('select_category.html', categories=categories)
+
+
+
+@user_blueprint.route('/search_categories', methods=['GET'])
+def search_categories():
+    # Implement your logic to search for categories by name here
+    query = request.args.get('query')
+    
+    # Example logic: search for categories containing the query string
+    categories = Category.query.filter(Category.name.ilike(f'%{query}%')).all()
+    
+    # Check if categories are found
+    if not categories:
+        return jsonify({'message': 'No categories found.'}), 404
+    
+    # Convert categories to JSON format
+    category_data = [{'id': category.id, 'name': category.name} for category in categories]
+    
+    # Return the JSON response with categories
+    return jsonify(category_data), 200
+
+
 
 
 def get_levels_for_category(category_id):
@@ -163,12 +190,21 @@ def submit_answers():
 
     # Iterate over each question to gather user submissions and correct answers
     for question in questions:
-        user_answer = request.form.get('answer_{}'.format(question.id))
+        user_answer_key = 'answer_{}'.format(question.id)
+        user_answer = request.form.get(user_answer_key)
         correct_answer = question.correct_answer
+        
+        # Check if user has submitted an answer
+        if user_answer is None:
+            # If user hasn't submitted an answer, set user_answer to an empty string
+            user_answer = ""
+
         user_submissions.append({
             'question_text': question.question_text,
             'user_answer': user_answer,
             'correct_answer': correct_answer
         })
 
+    # Render the template to display quiz results with user submissions
     return render_template('quiz_result.html', user_submissions=user_submissions)
+

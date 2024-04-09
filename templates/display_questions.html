@@ -2,47 +2,49 @@
     <h1>Quiz Questions</h1>
     
     <!-- Iterate over each question on the current page -->
-    {% for question in questions %}
-    <div>
-        <!-- Display the question text -->
-        <p>Question: {{ question.question_text }}</p>
-        
-        <!-- Display the options for the current question -->
-        <ul>
-            <!-- Iterate over question options -->
-            {% for option in question.options %}
-            <li>
-                <input type="radio" name="answer_{{ question.id }}" value="{{ option.id }}">
-                {{ option.option_text }}
-            </li>
-            <!-- Radio buttons for options -->
-            {% endfor %}
-        </ul>
-    </div>
-    {% endfor %}
+    <form action="{{ url_for('user.submit_answers') }}" method="POST">
+        {% for question in questions %}
+        <div>
+            <!-- Display the question text -->
+            <p>Question: {{ question.question_text }}</p>
+            
+            <!-- Display the options for the current question -->
+            <ul>
+                <!-- Iterate over question options -->
+                {% for option in question.options %}
+                <li>
+                    <label>
+                        <input type="radio" name="answer_{{ question.id }}" value="{{ option.id }}" required> <!-- Add required attribute -->
+                        {{ option.option_text }}
+                    </label>
+                </li>
+                <!-- Radio buttons for options -->
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
 
-    <!-- Pagination links -->
-    <div>
-        <!-- Link to navigate to the previous page -->
-        {% if current_page > 1 %}
-        <a href="{{ url_for('user.display_questions', category_id=category_id, level_number=level_number, page=current_page-1) }}">Previous</a>
-        {% endif %}
-        
-        <!-- Display current page and total pages -->
-        Page {{ current_page }} of {{ total_pages }}
-        
-        <!-- Link to navigate to the next page -->
-        {% if current_page < total_pages %}
-        <a href="{{ url_for('user.display_questions', category_id=category_id, level_number=level_number, page=current_page+1) }}">Next</a>
-        {% endif %}
-        
-        <!-- Display the submit button only on the last page -->
-        {% if current_page == total_pages %}
-        <form action="{{ url_for('user.submit_answers') }}" method="POST">
+        <!-- Pagination links -->
+        <div>
+            <!-- Link to navigate to the previous page -->
+            {% if current_page > 1 %}
+            <a href="{{ url_for('user.display_questions', category_id=category_id, level_number=level_number, page=current_page-1) }}">Previous</a>
+            {% endif %}
+            
+            <!-- Display current page and total pages -->
+            Page {{ current_page }} of {{ total_pages }}
+            
+            <!-- Link to navigate to the next page -->
+            {% if current_page < total_pages %}
+            <a href="{{ url_for('user.display_questions', category_id=category_id, level_number=level_number, page=current_page+1) }}">Next</a>
+            {% endif %}
+            
+            <!-- Display the submit button only on the last page -->
+            {% if current_page == total_pages %}
             <input type="hidden" name="category_id" value="{{ category_id }}">
             <input type="hidden" name="level_number" value="{{ level_number }}">
             <input type="submit" value="Submit Answers">
-        </form>
-        {% endif %}
-    </div>
+            {% endif %}
+        </div>
+    </form>
 </body>

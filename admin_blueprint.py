@@ -261,4 +261,4 @@ def get_admin_code():
     try:
         return jsonify({'admin_code': admin_registration_code}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Internal server error occurred. Please try again later.'}), 500
